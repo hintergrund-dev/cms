@@ -200,7 +200,7 @@ modal-dialog h2 {
 .changes {
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
+    overflow-y: auto;
     gap: 1rem;
     padding: 1rem;
     border-bottom: 1px solid rgb(208, 215, 222);

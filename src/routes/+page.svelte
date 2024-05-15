@@ -1,5 +1,0 @@
-<script>
-
-</script>
-
-Statische Seite
