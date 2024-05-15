@@ -3,7 +3,7 @@
     import MainMenu from './MainMenu.svelte';
 	import StepNav from './StepNav.svelte';
     import Assets from './Assets.svelte';
-    import { collections, config, fetchData } from './stores/collections.js';
+    import { collections, config, fetchDataLocal } from './stores/collections.js';
     import { changes } from './stores/changes.js';
     import RecordList from './RecordList.svelte';
     import Record from './Record.svelte';
@@ -11,7 +11,8 @@
 	import Header from './Header.svelte';
     
     onMount(async () => {
-        let data = await fetchData();
+        // let data = await fetchData();
+        let data = await fetchDataLocal();
         config.set(data.config);
         collections.set(data.collections);
     });
@@ -62,7 +63,7 @@
     }
 </script>
 
-<div>
+<div id="admin">
     <Header />
     <div class="container">
         <MainMenu />
@@ -122,14 +123,11 @@
 </div>
 
 <style>
-:global(
-    *,
-    *::before,
-    *::after
-) {
+:global(#admin *, #admin *::before,#admin *::after)
+ {
     box-sizing: border-box;
 }
-:global(:root) {
+:global(#admin) {
     font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
     color: rgb(36, 41, 47);
 }

@@ -41,4 +41,20 @@ async function fetchData() {
 	return data;
 }
 
+import conf from '../content/config.json';
+import globals from '../content/globals.json';
+import todos from '../content/todos.json';
+export async function fetchDataLocal() {
+	return new Promise((resolve, reject) => {
+		setTimeout(() => {
+			resolve({
+				config: conf,
+				collections: {
+					globals,
+					todos
+				}
+			});
+		}, 2000);
+	});
+}
 export { collections, config, fetchData };

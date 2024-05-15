@@ -1,6 +1,7 @@
 <script>
     import { changes } from './stores/changes';
     import { collectionId, recordId } from './stores/location';
+    import { SvelteEditor, EditorTheme } from "@nextlint/svelte"
 
     /** @type {any} */
     export let record;
@@ -64,11 +65,17 @@
                 {:else if field.widget === 'richtext'}
                     <!-- <RichEditor name={name} record={record} persistLocal={persistLocal} /> -->
                     <div class="field">
-                        <label for="{name}">{name}</label>
+                        <!-- <label for="{name}">{name}</label>
                         <textarea name="{name}" id={name} rows="4" bind:value={record[name]} on:change={() => persistLocal()}></textarea>
                         <div class="rich-editor">
                             {@html record[name]}
-                        </div>
+                        </div> -->
+                        <EditorTheme>
+                            <SvelteEditor 
+                            content=""
+                            placeholder="Start editing..."
+                            />
+                        </EditorTheme>
                     </div>
                 {:else if field.widget === 'checkbox'}
                     <div class="field">
@@ -123,7 +130,6 @@
                 {/if}
             {/if}
         {/each}
-        <button>Commit</button>
     </div>
 {/if}
 

@@ -1,0 +1,54 @@
+{
+	"name": "@hintergrund/admin",
+	"version": "0.0.1-next.11",
+	"license": "AGPL-3.0",
+	"description": "Open Source serverless CMS",
+	"author": "Hintergrund Development",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/hintergrund-labs/cms"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"svelte": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist",
+		"!dist/**/*.test.*",
+		"!dist/**/*.spec.*"
+	],
+	"svelte": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"check": "tsc --project jsconfig.json",
+		"check:watch": "tsc --watch --project jsconfig.json"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-static": "^3.0.1",
+		"@sveltejs/vite-plugin-svelte": "^3.0.2",
+		"eslint": "^8.57.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-svelte": "^2.35.1",
+		"prettier": "^3.2.5",
+		"prettier-plugin-svelte": "^3.2.2",
+		"publint": "^0.2.7",
+		"sass": "^1.71.1",
+		"svelte": "^4.2.11",
+		"typescript": "^5.3.3",
+		"vite": "^5.1.4"
+	},
+	"dependencies": {
+		"@nextlint/svelte": "^3.0.0",
+		"@tiptap/core": "^2.2.4",
+		"@tiptap/pm": "^2.2.4",
+		"@tiptap/starter-kit": "^2.2.4"
+	}
+}
