@@ -3,7 +3,22 @@
     import { changes } from './stores/changes';
     import { collectionId, recordId } from './stores/location';
     import { Editor } from '@tiptap/core';
-    import StarterKit from '@tiptap/starter-kit';
+    // import StarterKit from '@tiptap/starter-kit';
+    import Document from '@tiptap/extension-document';
+    import Paragraph from '@tiptap/extension-paragraph';
+    import Text from '@tiptap/extension-text';
+    import Heading from '@tiptap/extension-heading';
+    import ListItem from '@tiptap/extension-list-item';
+    import BulletList from '@tiptap/extension-bullet-list';
+    import OrderedList from '@tiptap/extension-ordered-list';
+    import Link from '@tiptap/extension-link';
+    import Image from '@tiptap/extension-image';
+    import Bold from '@tiptap/extension-bold';
+    import Italic from '@tiptap/extension-italic';
+    import Underline from '@tiptap/extension-underline';
+    import History from '@tiptap/extension-history';
+    import TextAlign from '@tiptap/extension-text-align';
+    
     
     /** @type {any} */
     export let record;
@@ -13,8 +28,9 @@
 
     let richEditors = {};
     let richElements = {};
+    let richLinkWidgets = {};
+    let richLinkTexts = {};
 
-    let linkWidged = false;
     function changeEditorText(name, value) {
         switch(value) {
             case 'paragraph':
@@ -83,7 +99,30 @@
                 richEditors[name] = new Editor({
                     element: richElements[name],
                     extensions: [
-                    StarterKit,
+                        Document,
+                        Paragraph,
+                        Text,
+                        Heading,
+                        ListItem,
+                        BulletList,
+                        OrderedList,
+                        Link.configure({
+                            openOnClick: true,
+                            HTMLAttributes: {
+                                target: '_blank',
+                                rel: 'noopener noreferrer',
+                            }
+                        }),
+                        Image.configure({
+                            inline: true,
+                        }),
+                        Bold,
+                        Italic,
+                        Underline,
+                        History,
+                        TextAlign.configure({
+                            types: ['heading', 'paragraph'],
+                        }),
                     ],
                     content: record[name],
                     onTransaction: () => {
@@ -133,30 +172,44 @@
                         <label for="{name}">{name}</label>
                         {#if richEditors[name]}
                             <div class="toolbar">
-                                <button on:click={() => richEditors[name].chain().focus().toggleBold().run()}><b>B</b></button>
-                                <button on:click={() => richEditors[name].chain().focus().toggleItalic().run()}><i>I</i></button>
-                                <button on:click={() => richEditors[name].chain().focus().toggleStrike().run()}><u>U</u></button>
                                 <select value="paragraph" on:change={(e) => changeEditorText(name, e.target.value)}>
                                     <option value="paragraph">Paragraph</option>
                                     <option value="h1">Heading 1</option>
                                     <option value="h2">Heading 2</option>
-                                    <option value="h3">Heading 3</option>
+                                    <!-- <option value="h3">Heading 3</option>
                                     <option value="h4">Heading 4</option>
                                     <option value="h5">Heading 5</option>
-                                    <option value="h6">Heading 6</option>
-                                    <option value="blockquote">Blockquote</option>
+                                    <option value="h6">Heading 6</option> -->
+                                    <!-- <option value="blockquote">Blockquote</option> -->
                                 </select>
+
+                                <div class="separator"></div>
+
+                                <button on:click={() => richEditors[name].chain().focus().setTextAlign('left').run()}><svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0" /><path d="M4 12l10 0" /><path d="M4 18l14 0" /></svg></button>
+                                <button on:click={() => richEditors[name].chain().focus().setTextAlign('center').run()}><svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0" /><path d="M8 12l8 0" /><path d="M6 18l12 0" /></svg></button>
+                                <button on:click={() => richEditors[name].chain().focus().setTextAlign('right').run()}><svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 6l16 0" /><path d="M10 12l10 0" /><path d="M6 18l14 0" /></svg></button>
+                                
+                                <div class="separator"></div>
+
+                                <button on:click={() => richEditors[name].chain().focus().toggleBold().run()}><b>B</b></button>
+                                <button on:click={() => richEditors[name].chain().focus().toggleItalic().run()}><i>I</i></button>
+                                <button on:click={() => richEditors[name].chain().focus().toggleUnderline().run()}><u>U</u></button>
+                                <div class="separator"></div>
+                                
+                                <button on:click={() => richEditors[name].chain().focus().toggleBulletList().run()}><svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l11 0" /><path d="M9 12l11 0" /><path d="M9 18l11 0" /><path d="M5 6l0 .01" /><path d="M5 12l0 .01" /><path d="M5 18l0 .01" /></svg></button>
+                                <button on:click={() => richEditors[name].chain().focus().toggleOrderedList().run()}><svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 6h9" /><path d="M11 12h9" /><path d="M12 18h8" /><path d="M4 16a2 2 0 1 1 4 0c0 .591 -.5 1 -1 1.5l-3 2.5h4" /><path d="M6 10v-6l-2 2" /></svg></button>
+                                
+                                <div class="separator"></div>
                                 <button
                                     class="link"
                                     on:click={() => {
-                                        linkWidged = true;
+                                        richLinkWidgets[name] = !richLinkWidgets[name];
                                     }}
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
-                                        class="icon icon-tabler icon-tabler-link"
-                                        width="15"
-                                        height="15"
+                                        width="16"
+                                        height="16"
                                         viewBox="0 0 24 24"
                                         stroke-width="2"
                                         stroke="currentColor"
@@ -170,19 +223,22 @@
                                         <path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" />
                                     </svg>
                                 </button>
-                                {#if linkWidged}
-                                    <!-- <div class="link-widget">
-                                        <input on:mousedown|stopPropagation type="text" bind:value={linkText} placeholder="Link" />
+                                <button class="link">
+                                    <svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8h.01" /><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z" /><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5" /><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3" /></svg>
+                                </button>
+                                {#if richLinkWidgets[name]}
+                                    <div class="link-widget">
+                                        <input on:mousedown|stopPropagation type="text" bind:value={richLinkTexts[name]} placeholder="Link" />
                                         <button
                                             on:click={() => {
-                                                editor.chain().focus().extendMarkRange('link').setLink({ href: 'https://example.com' }).run();
+                                                richEditors[name].chain().focus().extendMarkRange('link').setLink({ href: richLinkTexts[name] }).run();
                                             }}>Add</button
                                         >
-                                    </div> -->
+                                    </div>
                                 {/if}
                             </div>
                         {/if}
-                        <div bind:this={richElements[name]}></div>
+                        <div on:click={() => richLinkWidgets[name] = false} bind:this={richElements[name]}></div>
                     </div>
                     
                 {:else if field.widget === 'checkbox'}
@@ -215,7 +271,7 @@
                 {:else if field.widget === 'select-single'}
                     <div class="field">
                         <label for="{name}">{name}</label>
-                        <select name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}>
+                        <select class="single" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}>
                             {#each field.options as option}
                                 <option value="{option.value}">{option.label}</option>
                             {/each}
@@ -224,7 +280,7 @@
                 {:else if field.widget === 'select-multiple'}
                     <div class="field">
                         <label for="{name}">{name}</label>
-                        <select name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}>
+                        <select class="multiple" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}>
                             {#each field.options as option}
                                 <option value="{option.value}">{option.label}</option>
                             {/each}
@@ -256,7 +312,7 @@
         margin: 2rem 0 0.5rem;
         font-size: 0.875rem;
     }
-    input[type="text"], input[type="date"], input[type="datetime-local"], textarea, .checkbox, select, input[type="number"] {
+    input[type="text"], input[type="date"], input[type="datetime-local"], textarea, .checkbox, select.single, select.multiple, input[type="number"] {
         display: block;
         position: relative;
         outline: none;
@@ -275,14 +331,14 @@
         height: 40px;
         max-height: 40px;
     }
-    input[type="text"]:active, .field input[type="text"]:focus, .field input[type="date"]:active, .field input[type="date"]:focus, .field textarea:active, .field textarea:focus, .field .checkbox:focus-within, .field select:active, .field select:focus, .field input[type="datetime-local"]:active, .field input[type="datetime-local"]:focus, input[type="number"]:active, input[type="number"]:focus {
+    input[type="text"]:active, input[type="text"]:focus, input[type="date"]:active, input[type="date"]:focus, textarea:active, textarea:focus, .checkbox:focus-within, select.single:active, select.multiple:active, select.single:focus, select.multiple:focus, input[type="datetime-local"]:active, input[type="datetime-local"]:focus, input[type="number"]:active, input[type="number"]:focus {
         border-color: rgb(0, 89, 200);
         box-shadow: rgb(152, 203, 255) 0px 0px 0px 3px;
     }
     textarea {
         resize: vertical;
     }
-    select {
+    select.single, select.multiple {
         appearance: none;
         background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZT0iY3VycmVudENvbG9yIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIHN0cm9rZT0ibm9uZSIgZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik02IDlsNiA2bDYgLTYiIC8+PC9zdmc+") no-repeat 98.5% 50%;
     }
@@ -292,7 +348,7 @@
         box-sizing: border-box;
         background-color: rgb(255, 255, 255);
         border: 1px solid rgb(207, 217, 224);
-        border-radius: 6px;
+        border-radius: 0 0 6px 6px;
         color: rgb(65, 77, 99);
         font-size: 0.875rem;
         padding: 10px 0.75rem;
@@ -310,6 +366,10 @@
         max-width: 100%;
         height: auto;
     }
+    :global(.tiptap a) {
+        color: #007bff;
+        text-decoration: underline;
+    }
     :global(.tiptap blockquote) {
         padding-left: 1rem;
         border-left: 2px solid rgba(#0D0D0D, 0.1);
@@ -325,25 +385,47 @@ input, select {
     vertical-align: middle;
 }
 .toolbar {
+    height: 2.5rem;
     display: flex;
     align-items: center;
     position: relative;
-    border-bottom: 1px solid #ccc;
-    padding: 1rem;
-}
-button {
-    background: #fff;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 1rem;
-    padding: 4px 8px;
-    transition: all 0.2s ease-in-out;
+    border-bottom: none;
+    button {
+        width: 2.5rem;
+        height: 2.5rem;
+        background: #fff;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        transition: all 0.2s ease-in-out;
+    }
+    button:hover {
+        background: #f5f5f5;
+    }
+    select {
+        background: #fff;
+        border: none;
+        cursor: pointer;
+
+        padding: 10px 2rem 10px 1rem;
+        transition: all 0.2s ease-in-out;
+        appearance: none;
+        outline: none;
+        background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMiIgaGVpZ2h0PSIxMiIgdmlld0JveD0iMCAwIDEyIDEyIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZT0iY3VycmVudENvbG9yIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIHN0cm9rZT0ibm9uZSIgZD0iTTAgMGgxMnYxMkgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0zIDRsMyAzIDMgLTMiIC8+PC9zdmc+") no-repeat 90% 50%;
+    }
+    .separator {
+        border-left: 1px solid #ccc;
+        height: 2.5rem;
+    }
+    .text-align {
+        min-width: 8.05rem;
+    }
+    .formatting {
+        min-width: 8.05rem;
+    }
 }
-button:hover {
-    background: #f5f5f5;
-}
-select {
+select.single, select.multiple {
     background: #fff;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -355,42 +437,44 @@ select {
     width: 120px;
     margin-right: 1rem;
 }
-select:focus {
+select.single:focus, select.multiple:focus {
     border-color: #0077cc;
     outline: none;
 }
 
-button.link {
-    display: flex;
-    align-items: center;
-}
-
 .link-widget {
     position: absolute;
+    width: max(50%, 200px);
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 0%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-evenly;
     background-color: #fff;
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 0.5rem;
+    z-index: 2;
+    gap: 0.5rem;
+    input {
+        margin-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 5px;
+    }
+    button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 10px 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 0;
+        height: 100%;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
 }
 
-.link-widget input {
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px;
-}
 
-.link-widget button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
 </style>

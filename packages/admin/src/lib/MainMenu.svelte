@@ -85,4 +85,9 @@ a.active {
     background-color: rgb(9, 105, 218);
     border-radius: 0.25rem;
 }
+@media screen and (max-width: 768px) {
+    aside {
+        display: none;
+    }
+}
 </style>

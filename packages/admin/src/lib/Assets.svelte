@@ -185,16 +185,20 @@
 .asset-container {
     display: flex;
     flex-wrap: wrap;
+    gap: 1.5rem;
     justify-content: space-evenly;
-    padding: 2rem;
+    padding: 2rem 0;
 }
 .asset-card {
-    border: 1px solid #999;
+    outline: none;
+    box-shadow: rgba(225, 228, 232, 0.2) 0px 2px 0px inset;
     cursor: pointer;
 }
 .selected {
-    /* focus blue border */
-    outline: 2px solid #2781ff;
+    border-color: rgb(0, 89, 200);
+    box-shadow: rgb(152, 203, 255) 0px 0px 0px 3px;
+    border: 1px solid rgb(207, 217, 224);
+    border-radius: 6px;
 }
 .asset-path {
     display: flex;
@@ -202,6 +206,7 @@
     align-items: center;
     background-color: var(--color-base-0);
     height: 4rem;
+    font-size: 0.9rem;
 }
 .asset {
     display: flex;

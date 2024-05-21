@@ -12,13 +12,11 @@
     
     onMount(async () => {
         let data;
-        const MODE = import.meta.env.MODE;
-        if (MODE === 'development') {
-            data = await fetchDataLocal();
-        } else {
-            data = await fetchData();
-        }
-        console.log(MODE);
+        // data = await fetchDataLocal();
+        
+        data = await fetchData();
+        
+        console.log(data);
         config.set(data.config);
         collections.set(data.collections);
     });

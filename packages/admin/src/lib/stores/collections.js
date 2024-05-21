@@ -54,7 +54,7 @@ export async function fetchDataLocal() {
 					todos
 				}
 			});
-		}, 30000);
+		}, 1000);
 	});
 }
 export { collections, config, fetchData };
