@@ -11,7 +11,7 @@ export function getTemplate(element, params = '') {
     </head>
     <body>
         <${element} ${params}></${element}>
-        <script type="module" src="https://unpkg.com/@hintergrund/cms@0.0.1-next.10/dist/index.js"></script>
+        <script type="module" src="https://unpkg.com/@hintergrund/admin@0.0.1-next.11/dist/index.js"></script>
     </body>
   </html>
   `;
