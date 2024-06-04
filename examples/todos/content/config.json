@@ -2,7 +2,7 @@
 	"globals": {
 		"title": "Global Data",
 		"slug": "globals",
-		"description": "Global site data for the Website",
+		"description": "Global data for the website",
 		"file": "globals.json",
 		"fields": {
 			"title": {

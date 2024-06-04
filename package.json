@@ -1,8 +1,8 @@
 {
 	"name": "cms",
 	"scripts": {
-		"build": "",
-		"start": "wrangler pages dev public --live-reload"
+		"build": "cd packages/admin && npm run build && cp dist/index.js ../../public",
+		"start": "npm run build && wrangler pages dev public --live-reload"
 	},
 	"dependencies": {
 		"@octokit/rest": "^20.0.2",

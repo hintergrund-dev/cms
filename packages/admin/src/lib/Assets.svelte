@@ -8,7 +8,7 @@
     let file;
     
     // TODO: Filter based on asset type
-    /** @type {{fileName: string, path: string}[]} */
+    /** @type {{name: string, path: string, download_url: string}[]} */
     let assets = [];
 
     let updating = false;
@@ -20,8 +20,10 @@
 
     onMount(async () => {
         getAssets();
+        // getAssetsLocal();
     })
 
+    $: console.log(assets);
     async function getAssets() {
         updating = true;
         try {
@@ -31,6 +33,13 @@
         } catch (error) {
             console.error('Failed to fetch:', error);
         }
+        updating = false;
+    }
+    async function getAssetsLocal() {
+        updating = true;
+        setTimeout(() => {
+            assets = [{ name: 'Hoi.jpg', path: '/image.png', download_url: '/image.png'}];
+        }, 1000)
         updating = false;
     }
 
@@ -193,6 +202,9 @@
     outline: none;
     box-shadow: rgba(225, 228, 232, 0.2) 0px 2px 0px inset;
     cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid rgb(207, 217, 224);
+    overflow: hidden;
 }
 .selected {
     border-color: rgb(0, 89, 200);

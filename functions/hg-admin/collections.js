@@ -156,35 +156,42 @@ export async function onRequestPut(context) {
 export async function onRequestDelete(context) {
 	try {
 		const { env, request } = context;
-		const { message, repository, path } = await request.json();
+		const deleteData = await request.json();
+		const collectionId = Object.keys(deleteData)[0];
 
 		const configRaw = await env.HG_CONFIG;
 		const config = JSON.parse(configRaw);
 
-		const headers = {
-			'User-Agent': 'request',
-			Accept: 'application/vnd.github+json',
-			Authorization: `token ${config.gitToken}`
-		};
-		const fileInfo = await fetch(
-			`https://api.github.com/repos/${repository}/contents/${path}?ref=main`,
-			{ headers }
-		).then((res) => res.json());
+		const octokit = new Octokit({
+			auth: config.gitToken
+		});
 
-		if (!fileInfo.sha) {
-			return new Response('Resource was already deleted', { status: 204 });
+		// TODO: check if file has changed since frontend version
+		const fileInfo = await octokit.rest.repos.getContent({
+			owner: config.gitOwner,
+			repo: config.gitRepo,
+			path: `${config.contentDir}/${collectionId}.json`,
+			ref: config.branch
+		});
+
+		// Commit to file with deletion
+		const response = await octokit.rest.repos.createOrUpdateFileContents({
+			owner: config.gitOwner,
+			repo: config.gitRepo,
+			path: `${config.contentDir}/${collectionId}.json`,
+			message: `Delete record(s) from ${collectionId} [CI SKIP]`,
+			content: btoa(JSON.stringify(deleteData[collectionId], null, 4)),
+			branch: config.branch,
+			sha: fileInfo.data.sha
+		});
+
+		if (response.status !== 200) {
+			return new Response(`Error deleting record(s) from ${collectionId}`, {
+				status: 500
+			});
 		}
-		const body = JSON.stringify({
-			message,
-			sha: fileInfo.sha,
-			branch: 'main'
-		});
-		const response = await fetch(`https://api.github.com/repos/${repository}/contents/${path}`, {
-			method: 'DELETE',
-			headers,
-			body
-		});
-		return new Response(response, { status: 200 });
+
+		return new Response(`Deleted record from ${collectionId}`, { status: 200 });
 	} catch (error) {
 		console.log(error);
 		return new Response(error.message, {
