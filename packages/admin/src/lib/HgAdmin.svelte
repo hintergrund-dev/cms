@@ -35,13 +35,16 @@
     $: {
         if (Object.keys($changes).length > 0) {
             localStorage.setItem('changes', JSON.stringify($changes));
+            // Check if the changes object has empty collections
+        } else {
+            localStorage.removeItem('changes');
         }
     }
 
     /**
      * @param {string} collectionId
      */
-    export function createNewRecord(collectionId) {
+    function createNewRecord(collectionId) {
         let recId = generateId();
         const collectionConfig = $config[collectionId];
         let record = {};
@@ -62,7 +65,7 @@
      * Generates a unique ID
      * @returns {string} - A unique ID
      */
-    export function generateId() {
+    function generateId() {
         return Math.random().toString(36).substring(2, 12);
     }
 </script>
@@ -206,6 +209,9 @@ h2 {
 :global(a:visited) {
 	color: rgb(36, 41, 47);
 	text-decoration: none;
+}
+:global(button) {
+    font-family: inherit;
 }
 :global(.btn){
     font-weight: 500;

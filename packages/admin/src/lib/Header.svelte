@@ -1,6 +1,8 @@
 <script>
+	import { fade } from 'svelte/transition';
     import { changes } from './stores/changes';
     import { config, collections } from './stores/collections.js';
+    import { notifications } from './stores/notifications';
     /** @type { HTMLFormElement } */
     let logoutForm;
 
@@ -21,6 +23,9 @@
         changes.update((changes) => {
             if (recordId !== undefined) {
                 delete changes[collectionId][recordId];
+                if (Object.keys(changes[collectionId]).length === 0) {
+                    delete changes[collectionId];
+                }
             } else {
                 delete changes[collectionId];
             }
@@ -33,6 +38,7 @@
         Object.keys($changes).forEach(collectionId => {
             commitData[collectionId] = $collections[collectionId];
         });
+    
         fetch('/hg-admin/collections', {
             method: 'PUT',
             headers: {
@@ -40,11 +46,17 @@
             },
             body: JSON.stringify(commitData)
         }).then(response => {
-            if (response.status === 200) {
+            if (!response.ok || response.status !== 200) {
+                throw new Error('Failed to save changes')
+            } else {
                 changes.set({});
                 confirmModal = false;
             }
+        }).catch(_ => {
+            notifications.add({type: 'danger', message: 'Failed to save changes'});
+            confirmModal = false;
         });
+       
     }
 </script>
 
@@ -116,6 +128,14 @@
         <form bind:this={logoutForm} method="POST" action="/hg-admin/logout"></form>
     </div>
 </header>
+
+{#each $notifications as notification}
+    <div class="notification-banner" out:fade={{duration:1500}} class:danger={notification.type==='danger'} class:success={notification.type==='success'} class:warning={notification.type==='warning'}>
+        <span>{notification.message}</span>
+        <svg on:click={() => notifications.remove(notification)} 
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>
+    </div>
+{/each}
 
 <style>
 header {
@@ -189,13 +209,12 @@ header {
     width: min(600px,100vw - 4rem);
 }
 modal-dialog h2 {
-    margin: 1.5rem 0 1rem;
-    scroll-margin-top: 4rem;
-    line-height: 1.25;
-    padding: 0.5rem;
-    font-size: 1.5rem;
-    border-bottom: 1px solid rgb(208, 215, 222);
+    padding: 1rem 1rem 1rem 1.5rem;
+    margin: 0;
+    line-height: 1.5rem;
     font-weight: 500;
+    font-size: 1rem;
+    border-bottom: 1px solid rgb(208, 215, 222);
 }
 .changes {
     display: flex;
@@ -234,5 +253,30 @@ modal-dialog h2 {
     justify-content: flex-end;
     padding: 1rem;
     gap: 1rem;
+}
+
+.notification-banner {
+    background-color: #ddf4ff;
+    border-bottom: 1px solid #54aeff66;
+    padding: 1.25rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    z-index: 999;
+    box-shadow: 0 1px 3px rgba(31,35,40,0.12), 0 8px 24px rgba(66,74,83,0.12);
+    border-top: 1px solid rgba(255,255,255,0.2);
+}
+.notification-banner.danger {
+    background-color: #fde8e8;
+    border-bottom: 1px solid #ff4d4d66;
+}
+.notification-banner.success {
+    background-color: #e6f9e6;
+    border-bottom: 1px solid #00b30066;
+}
+.notification-banner.warning {
+    background-color: #fff7e6;
+    border-bottom: 1px solid #ff9f0066;
 }
 </style>

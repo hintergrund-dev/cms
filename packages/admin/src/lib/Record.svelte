@@ -125,7 +125,7 @@
                         }),
                     ],
                     content: record[name],
-                    onTransaction: () => {
+                    onUpdate: () => {
                         richEditors[name] = richEditors[name];
                         // Check if the editor is already created
                         if (richEditors[name]) {
@@ -146,7 +146,7 @@
 </script>
 
 {#if config && record}
-    <div class="container-record">
+    <div class="record-container">
         {#each Object.entries(config.fields) as [name, field]}
             {#if field.hidden}
                 <input type="hidden" bind:value="{record[name]}" />
@@ -162,7 +162,7 @@
                         <textarea name="{name}" id={name} rows="4" bind:value={record[name]} on:change={() => persistLocal()}></textarea>
                     </div>
                 {:else if field.widget === 'number'}
-                    <div class="field">
+                    <div class="field small">
                         <label for="{name}">{name}</label>
                         <input type="number" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()} />
                     </div>
@@ -242,19 +242,20 @@
                     </div>
                     
                 {:else if field.widget === 'checkbox'}
-                    <div class="field">
+                    <div class="field small">
                         <label for="{name}">{name}</label>
-                        <button class="checkbox" on:click|self={() => record[name] = !record[name]}>
+                        <div class="checkbox" on:click|self={() => record[name] = !record[name]} tabindex="-1">
                             <input type="checkbox" name="{name}" id={name} bind:checked="{record[name]}" on:change={() => persistLocal()}/>
-                        </button>
+                            <label for="{name}">{name}</label>
+                        </div>
                     </div>
                 {:else if field.widget === 'date'}
-                    <div class="field">
+                    <div class="field small">
                         <label for="{name}">{name}</label>
                         <input type="date" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}/>
                     </div>
                 {:else if field.widget === 'datetime'}
-                    <div class="field">
+                    <div class="field small">
                         <label for="{name}">{name}</label>
                         <input type="datetime-local" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}/>
                     </div>
@@ -269,7 +270,7 @@
                         <input type="text" name="{name}" id={name} value="{record[name]}" on:change={() => persistLocal()}/>
                     </div> -->
                 {:else if field.widget === 'select-single'}
-                    <div class="field">
+                    <div class="field small">
                         <label for="{name}">{name}</label>
                         <select class="single" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}>
                             {#each field.options as option}
@@ -278,13 +279,29 @@
                         </select>
                     </div>
                 {:else if field.widget === 'select-multiple'}
-                    <div class="field">
+                    <div class="field small">
                         <label for="{name}">{name}</label>
-                        <select class="multiple" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}>
-                            {#each field.options as option}
-                                <option value="{option.value}">{option.label}</option>
-                            {/each}
-                        </select>
+                        <!-- <select multiple style="height: {field.options.length * 1.2 + 1}rem" size="{field.options.length}" class="multiple" name="{name}" id={name} bind:value="{record[name]}" on:change={() => persistLocal()}> -->
+                            <div class="select-multiple" tabindex="-1">
+                                {#each field.options as option}
+                                <div>
+                                    <input type="checkbox" name="{option.value}" id={option.value} on:change={() => {
+                                        if (record[name] === undefined) {
+                                            record[name] = [];
+                                        }
+                                        if (record[name].includes(option.value)) {
+                                            record[name] = record[name].filter((item) => item !== option.value);
+                                        } else {
+                                            record[name] = [...record[name], option.value];
+                                        }
+                                        persistLocal();
+                                    }}/>
+                                    <label for="{option.value}">{option.label}</label>
+                                </div>
+                                    <!-- <option value="{option.value}">{option.label}</option> -->
+                                {/each}
+                            </div>
+                        <!-- </select> -->
                     </div>
                 {:else if field.widget === 'derived'}
                     <div class="field">
@@ -299,20 +316,27 @@
 
 
 <style lang="scss">
-.container-record {
+.record-container {
     flex: 1 1 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
 }
 .field {
-    margin-bottom: 1rem;
+    margin: 1rem 0;
+    width: 100%;
+    &.small {
+        width: calc(50% - 1rem);
+    }
     label {
         text-transform: capitalize;
         display: block;
         border: 0;
         position: relative;
-        margin: 2rem 0 0.5rem;
+        margin-bottom: 0.5rem;
         font-size: 0.875rem;
     }
-    input[type="text"], input[type="date"], input[type="datetime-local"], textarea, .checkbox, select.single, select.multiple, input[type="number"] {
+    input[type="text"], input[type="date"], input[type="datetime-local"], textarea, .checkbox, select.single, .select-multiple, input[type="number"] {
         display: block;
         position: relative;
         outline: none;
@@ -324,21 +348,50 @@
         color: rgb(65, 77, 99);
         font-size: 0.875rem;
         line-height: 1.25rem;
-        padding: 10px 0.75rem;
+        padding: 0.625rem 0.75rem;
         margin: 0px;
         cursor: auto;
         width: 100%;
         height: 40px;
-        max-height: 40px;
     }
-    input[type="text"]:active, input[type="text"]:focus, input[type="date"]:active, input[type="date"]:focus, textarea:active, textarea:focus, .checkbox:focus-within, select.single:active, select.multiple:active, select.single:focus, select.multiple:focus, input[type="datetime-local"]:active, input[type="datetime-local"]:focus, input[type="number"]:active, input[type="number"]:focus {
+    input[type="text"]:active, input[type="text"]:focus, input[type="date"]:active, input[type="date"]:focus, textarea:active, textarea:focus, .checkbox:focus-within, .checkbox:focus, .select-multiple:focus-within, .select-multiple:focus, select.single:active, select.multiple:active, select.single:focus, select.multiple:focus, input[type="datetime-local"]:active, input[type="datetime-local"]:focus, input[type="number"]:active, input[type="number"]:focus {
         border-color: rgb(0, 89, 200);
         box-shadow: rgb(152, 203, 255) 0px 0px 0px 3px;
+    }
+    .checkbox {
+        display: flex;
+        align-items: center;
+        label {
+            margin: 0;
+            flex-grow: 1;
+        }
+        input {
+            margin-right: 0.5rem;
+        }
+    }
+    .select-multiple {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        label {
+            display: inline;
+            margin: 0;
+            flex-grow: 1;
+        }
+        > div {
+            display: flex;
+            align-items: center;
+            margin: 0.25rem 0;
+            input {
+                margin-right: 0.5rem;
+            }
+        }
+        
     }
     textarea {
         resize: vertical;
     }
-    select.single, select.multiple {
+    select.single {
         appearance: none;
         background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZT0iY3VycmVudENvbG9yIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIHN0cm9rZT0ibm9uZSIgZD0iTTAgMGgyNHYyNEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik02IDlsNiA2bDYgLTYiIC8+PC9zdmc+") no-repeat 98.5% 50%;
     }

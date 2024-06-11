@@ -1,6 +1,8 @@
 <script>
     import { onMount } from 'svelte';
 	import Spinner from './Spinner.svelte';
+    import { notifications } from './stores/notifications';
+
     let selected;
     /** @type {FileList} */
     let files;
@@ -89,8 +91,10 @@
                 setTimeout(() => {
                     getAssets();
                 }, 1000);
+                notifications.add({type: 'success', message: `Asset ${name} uploaded successfully.`})
             } else {
                 updating = false;
+                notifications.add({type: 'error', message: `Failed to upload asset ${name}.`})
             }
         } else {
             console.log("File already exists");

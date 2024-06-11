@@ -3,7 +3,8 @@
 		"title": "Buy food",
 		"slug": "buy-food",
 		"description": "<h4>Lets buy food</h4><p>Bread<br>Milk<br>Eggs</p>",
-		"done": false
+		"done": true,
+		"category": ["home", "work"]
 	},
 	"i1gp5hscgh": {
 		"title": "Dance",

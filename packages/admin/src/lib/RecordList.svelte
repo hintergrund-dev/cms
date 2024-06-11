@@ -1,5 +1,6 @@
 <script>
     import { collectionId } from "./stores/location";
+    import { notifications } from "./stores/notifications";
 
     /** @type {any} */
     export let config;
@@ -12,18 +13,22 @@
     let deleteModal = false;
 
     function deleteRecords(){
-        collection = Object.fromEntries(Object.entries(collection).filter(([id, _]) => !selected.includes(id)));
+        let modifiedCollection = Object.fromEntries(Object.entries(collection).filter(([id, _]) => !selected.includes(id)));
         
         fetch('/hg-admin/collections', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify( {[$collectionId]: collection})
+            body: JSON.stringify( {[$collectionId]: modifiedCollection})
         }).then(response => {
             if (response.status === 200) {
+                collection = modifiedCollection;
                 selected = [];
                 deleteModal = false;
+                notifications.add({type: '', message: 'Record deleted successfully'});
+            } else {
+                notifications.add({type: 'danger', message: 'Failed to delete record'});
             }
         });
     }
@@ -211,21 +216,11 @@ tbody tr:hover {
     width: min(600px,100vw - 4rem);
 }
 modal-dialog h2 {
-    margin: 1.5rem 0 1rem;
-    scroll-margin-top: 4rem;
-    line-height: 1.25;
-    font-size: 1.5rem;
-    border-bottom: 1px solid rgb(208, 215, 222);
-    font-weight: 500;
-    display: flex;
-    -webkit-box-pack: justify;
-    justify-content: space-between;
-    -webkit-box-align: center;
-    align-items: center;
-    position: relative;
     padding: 1rem 1rem 1rem 1.5rem;
-    font-size: 1rem;
     margin: 0;
     line-height: 1.5rem;
+    font-weight: 500;
+    font-size: 1rem;
+    border-bottom: 1px solid rgb(208, 215, 222);
 }
 </style>
