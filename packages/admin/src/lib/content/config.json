@@ -103,6 +103,11 @@
 					}
 				]
 			},
+			"image": {
+				"label": "Image",
+				"widget": "asset",
+				"required": false
+			},
 			"category": {
 				"label": "Category",
 				"widget": "select-multiple",

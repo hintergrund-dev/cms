@@ -2,6 +2,12 @@
     import { onMount } from 'svelte';
 	import Spinner from './Spinner.svelte';
     import { notifications } from './stores/notifications';
+    import { location } from './stores/location';
+
+    export let handleAssetChange = (_) => {};
+    export let preselected = '';
+
+    $: selected !== undefined && handleAssetChange(selected);
 
     let selected;
     /** @type {FileList} */
@@ -23,9 +29,9 @@
     onMount(async () => {
         getAssets();
         // getAssetsLocal();
+        selected = preselected;
     })
 
-    $: console.log(assets);
     async function getAssets() {
         updating = true;
         try {
@@ -40,7 +46,7 @@
     async function getAssetsLocal() {
         updating = true;
         setTimeout(() => {
-            assets = [{ name: 'Hoi.jpg', path: '/image.png', download_url: '/image.png'}];
+            assets = [{ name: '/image.png', path: '/image.png', download_url: '/image.png'}];
         }, 1000)
         updating = false;
     }
@@ -136,9 +142,11 @@
 </script>
 
 <div class="asset-actions">
-    <a class:disabled={!selected} class="btn" download href={selected}>
-        Download
-    </a>
+    {#if $location === 'assets'}
+        <a class:disabled={!selected} class="btn" download href={selected}>
+            Download
+        </a>
+    {/if}
     <label class="btn">
         <!-- If element not cloned, every time, change event is not triggered if same file gets selected -->
         {#if !updating}
@@ -146,7 +154,9 @@
         {/if}
         Upload
     </label>
-    <button class:disabled={!selected} class="btn danger" on:click={deleteAsset}>Delete selected</button>
+    {#if $location === 'assets'}
+        <button class:disabled={!selected} class="btn danger" on:click={deleteAsset}>Delete selected</button>
+    {/if}
 </div>
 <div class="asset-container">
     {#if !updating}
@@ -154,7 +164,7 @@
             {#each assets as asset}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <div class="asset-card" on:click={() => {selected = (selected === asset.name) ? null : asset.name}} class:selected={selected === asset.name}>
+            <div class="asset-card" on:click={() => {selected = (selected === asset.name) ? '' : asset.name}} class:selected={selected === asset.name}>
                 <div class="asset">
                     {#if (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i).test(asset.name)}
                         <img src={asset.download_url} alt={asset.name}/>

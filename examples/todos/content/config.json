@@ -51,7 +51,7 @@
 			},
 			"description": {
 				"label": "Description",
-				"widget": "text",
+				"widget": "richtext",
 				"description": "The description of the to do",
 				"required": false,
 				"default": "New To Do",
@@ -102,6 +102,11 @@
 						"value": "high"
 					}
 				]
+			},
+			"image": {
+				"label": "Image",
+				"widget": "asset",
+				"required": false
 			},
 			"category": {
 				"label": "Category",

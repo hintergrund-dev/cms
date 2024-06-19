@@ -12,11 +12,9 @@
     
     onMount(async () => {
         let data;
-        data = await fetchDataLocal();
+        // data = await fetchDataLocal();
+        data = await fetchData();
         
-        // data = await fetchData();
-        
-        console.log(data);
         config.set(data.config);
         collections.set(data.collections);
     });

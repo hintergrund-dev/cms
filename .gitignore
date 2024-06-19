@@ -12,3 +12,5 @@ vite.config.ts.timestamp-*
 .DS_Store
 
 packages/admin/pnpm-lock.yaml
+
+public/index.js

@@ -18,6 +18,7 @@
     import Underline from '@tiptap/extension-underline';
     import History from '@tiptap/extension-history';
     import TextAlign from '@tiptap/extension-text-align';
+	import Assets from './Assets.svelte';
     
     
     /** @type {any} */
@@ -30,6 +31,9 @@
     let richElements = {};
     let richLinkWidgets = {};
     let richLinkTexts = {};
+
+    let assetWidget = "";
+    let selectedAsset = "";
 
     function changeEditorText(name, value) {
         switch(value) {
@@ -89,6 +93,14 @@
             }
             return changes;
         });
+    }
+    function handleAssetChange(selected){
+        selectedAsset = selected;
+    }
+    function setAsset() {
+        record[assetWidget] = selectedAsset;
+        assetWidget = "";
+        persistLocal();
     }
 
     onMount(() => {
@@ -303,6 +315,17 @@
                             </div>
                         <!-- </select> -->
                     </div>
+                {:else if field.widget === 'asset'}
+                    <div class="field">
+                        <label for="{name}">{name}</label>
+                        <button class="asset-btn" on:click={() => assetWidget = name}>
+                            {#if record[name]}
+                                {record[name]}
+                            {:else}
+                                <svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 9l5 -5l5 5" /><path d="M12 4l0 12" /></svg>
+                            {/if}
+                        </button>
+                    </div>
                 {:else if field.widget === 'derived'}
                     <div class="field">
                         <label for="{name}">{name}</label>
@@ -312,6 +335,24 @@
             {/if}
         {/each}
     </div>
+    {#if assetWidget}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="overlay-backdrop" on:click={() => assetWidget = ""}>
+        <modal-dialog class="overlay" on:click|stopPropagation>
+            <h2>
+                Choose from your assets
+            </h2>
+            <div class="assets">
+                <Assets {handleAssetChange} preselected={selectedAsset}/>
+            </div>
+            <div class="btn-end">
+                <button class="btn" on:click={() => assetWidget = ""}>Cancel</button>
+                <button class="btn" on:click={setAsset}>Choose</button>
+            </div>
+        </modal-dialog>
+    </div>
+    {/if}
 {/if}
 
 
@@ -325,9 +366,6 @@
 .field {
     margin: 1rem 0;
     width: 100%;
-    &.small {
-        width: calc(50% - 1rem);
-    }
     label {
         text-transform: capitalize;
         display: block;
@@ -336,7 +374,7 @@
         margin-bottom: 0.5rem;
         font-size: 0.875rem;
     }
-    input[type="text"], input[type="date"], input[type="datetime-local"], textarea, .checkbox, select.single, .select-multiple, input[type="number"] {
+    input[type="text"], input[type="date"], input[type="datetime-local"], input[type="number"], textarea, .checkbox, select.single, .select-multiple, .asset-btn {
         display: block;
         position: relative;
         outline: none;
@@ -354,7 +392,7 @@
         width: 100%;
         height: 40px;
     }
-    input[type="text"]:active, input[type="text"]:focus, input[type="date"]:active, input[type="date"]:focus, textarea:active, textarea:focus, .checkbox:focus-within, .checkbox:focus, .select-multiple:focus-within, .select-multiple:focus, select.single:active, select.multiple:active, select.single:focus, select.multiple:focus, input[type="datetime-local"]:active, input[type="datetime-local"]:focus, input[type="number"]:active, input[type="number"]:focus {
+    input[type="text"]:active, input[type="text"]:focus, input[type="date"]:active, input[type="date"]:focus, input[type="datetime-local"]:active, input[type="datetime-local"]:focus, input[type="number"]:active, input[type="number"]:focus, textarea:active, textarea:focus, .checkbox:focus-within, .checkbox:focus, .select-multiple:focus-within, .select-multiple:focus, select.single:active, select.multiple:active, select.single:focus, select.multiple:focus, .asset-btn:focus {
         border-color: rgb(0, 89, 200);
         box-shadow: rgb(152, 203, 255) 0px 0px 0px 3px;
     }
@@ -529,5 +567,45 @@ select.single:focus, select.multiple:focus {
     }
 }
 
-
+.overlay-backdrop {
+    align-items: center;
+    background-color: rgba(175,184,193,0.2);
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 999;
+    .assets {
+        padding: 2rem;
+    }
+    .overlay {
+        background-color: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(31,35,40,0.12), 0 8px 24px rgba(66,74,83,0.12);
+        display: flex;
+        flex-direction: column;
+        max-height: min(100vh - 2rem, 600px);
+        min-width: 192px;
+        opacity: 1;
+        white-space: normal;
+        width: min(1200px,100vw - 4rem);
+    }
+    modal-dialog h2 {
+        padding: 1rem 1rem 1rem 1.5rem;
+        margin: 0;
+        line-height: 1.5rem;
+        font-weight: 500;
+        font-size: 1rem;
+        border-bottom: 1px solid rgb(208, 215, 222);
+    }
+    .btn-end {
+        display: flex;
+        justify-content: flex-end;
+        padding: 1rem;
+        gap: 1rem;
+    }
+}
 </style>
