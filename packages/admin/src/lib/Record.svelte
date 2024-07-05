@@ -3,7 +3,6 @@
     import { changes } from './stores/changes';
     import { collectionId, recordId } from './stores/location';
     import { Editor } from '@tiptap/core';
-    // import StarterKit from '@tiptap/starter-kit';
     import Document from '@tiptap/extension-document';
     import Paragraph from '@tiptap/extension-paragraph';
     import Text from '@tiptap/extension-text';
@@ -32,8 +31,13 @@
     let richLinkWidgets = {};
     let richLinkTexts = {};
 
+    let richImageWidgets = {};
+
     let assetWidget = "";
-    let selectedAsset = "";
+    let selectedAsset = { name: ''};
+
+    let richAssetLinks = {};
+    let richTextAssetWidget = "";
 
     function changeEditorText(name, value) {
         switch(value) {
@@ -98,9 +102,20 @@
         selectedAsset = selected;
     }
     function setAsset() {
-        record[assetWidget] = selectedAsset;
+        record[assetWidget] = selectedAsset.name;
         assetWidget = "";
         persistLocal();
+    }
+    function setRichTextAsset() {
+        fetch(`/hg-admin/assets/${selectedAsset.name}`)
+            .then(response => response.json())
+            .then(data => {
+                const { image, mimeType } = data;
+
+                richEditors[richTextAssetWidget].chain().focus().setImage({ src: `data:${mimeType};base64,${image}` }).run();
+                richTextAssetWidget = "";
+                persistLocal();
+            });
     }
 
     onMount(() => {
@@ -126,6 +141,7 @@
                             }
                         }),
                         Image.configure({
+                            allowBase64: true,
                             inline: true,
                         }),
                         Bold,
@@ -136,7 +152,6 @@
                             types: ['heading', 'paragraph'],
                         }),
                     ],
-                    content: record[name],
                     onUpdate: () => {
                         richEditors[name] = richEditors[name];
                         // Check if the editor is already created
@@ -145,7 +160,10 @@
                             persistLocal();
                         }
                     },
-                })
+                    onCreate: () => {
+                        richEditors[name].commands.setContent(record[name]);
+                    },
+                });
             }
         });
     });
@@ -183,7 +201,9 @@
                     <div class="field">
                         <label for="{name}">{name}</label>
                         {#if richEditors[name]}
-                            <div class="toolbar">
+                            <!-- svelte-ignore a11y-click-events-have-key-events -->
+                            <!-- svelte-ignore a11y-no-static-element-interactions -->
+                            <div class="toolbar" on:click={() => {richLinkWidgets[name] = false; richImageWidgets[name] = false}}>
                                 <select value="paragraph" on:change={(e) => changeEditorText(name, e.target.value)}>
                                     <option value="paragraph">Paragraph</option>
                                     <option value="h1">Heading 1</option>
@@ -214,7 +234,7 @@
                                 <div class="separator"></div>
                                 <button
                                     class="link"
-                                    on:click={() => {
+                                    on:click|stopPropagation={() => {
                                         richLinkWidgets[name] = !richLinkWidgets[name];
                                     }}
                                 >
@@ -235,22 +255,40 @@
                                         <path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" />
                                     </svg>
                                 </button>
-                                <button class="link">
+                                <button class="image" on:click|stopPropagation={() => richImageWidgets[name] = !richImageWidgets[name]}>
                                     <svg  xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8h.01" /><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z" /><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5" /><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3" /></svg>
                                 </button>
                                 {#if richLinkWidgets[name]}
-                                    <div class="link-widget">
-                                        <input on:mousedown|stopPropagation type="text" bind:value={richLinkTexts[name]} placeholder="Link" />
-                                        <button
+                                    <div class="link-widget" on:click|stopPropagation>
+                                        <input type="text" bind:value={richLinkTexts[name]} placeholder="Link" />
+                                        <button class="add"
                                             on:click={() => {
                                                 richEditors[name].chain().focus().extendMarkRange('link').setLink({ href: richLinkTexts[name] }).run();
+                                                richLinkWidgets[name] = false;
                                             }}>Add</button
                                         >
                                     </div>
                                 {/if}
+                                {#if richImageWidgets[name]}
+                                    <div on:click|stopPropagation>
+                                        <div class="image-widget">
+                                            <input on:mousedown|stopPropagation type="text" bind:value={richAssetLinks[name]} placeholder="Source" />
+                                            <button class="add" on:click={() => {
+                                                richEditors[name].chain().focus().setImage({ src: richAssetLinks[name] }).run();
+                                                richImageWidgets[name] = false;
+                                            }}>Add</button>
+
+                                        </div>
+                                        <div class="image-widget second">
+                                            <button class="assets" on:click={() => {
+                                                richTextAssetWidget = name;
+                                            }}>Choose from assets</button>
+                                        </div>
+                                    </div>
+                                {/if}
                             </div>
                         {/if}
-                        <div on:click={() => richLinkWidgets[name] = false} bind:this={richElements[name]}></div>
+                        <div on:click={() => {richLinkWidgets[name] = false; richImageWidgets[name] = false}} bind:this={richElements[name]}></div>
                     </div>
                     
                 {:else if field.widget === 'checkbox'}
@@ -352,6 +390,24 @@
             </div>
         </modal-dialog>
     </div>
+    {/if}
+    {#if richTextAssetWidget}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="overlay-backdrop" on:click={() => richTextAssetWidget = ""}>
+            <modal-dialog class="overlay" on:click|stopPropagation>
+                <h2>
+                    Choose from your assets
+                </h2>
+                <div class="assets">
+                    <Assets {handleAssetChange} preselected={selectedAsset}/>
+                </div>
+                <div class="btn-end">
+                    <button class="btn" on:click={() => richTextAssetWidget = ""}>Cancel</button>
+                    <button class="btn" on:click={setRichTextAsset}>Choose</button>
+                </div>
+            </modal-dialog>
+        </div>
     {/if}
 {/if}
 
@@ -533,7 +589,7 @@ select.single:focus, select.multiple:focus {
     outline: none;
 }
 
-.link-widget {
+.link-widget, .image-widget {
     position: absolute;
     width: max(50%, 200px);
     top: 100%;
@@ -546,23 +602,32 @@ select.single:focus, select.multiple:focus {
     padding: 0.5rem;
     z-index: 2;
     gap: 0.5rem;
+    &.second {
+        top: calc(200% + 1rem);
+        padding: 0;
+        button {
+            width: 100%;
+            height: 3rem;
+            padding: 0.5rem;
+        }
+    }
     input {
         margin-right: 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
         padding: 5px;
     }
-    button {
+    button.add {
         background-color: #007bff;
         color: #fff;
         border: none;
-        padding: 10px 1rem;
         border-radius: 4px;
         cursor: pointer;
         margin-right: 0;
-        height: 100%;
+        height: 40px;
+        min-width: 50px;
     }
-    button:hover {
+    button.add:hover {
         background-color: #0056b3;
     }
 }

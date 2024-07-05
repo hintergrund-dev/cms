@@ -1,5 +1,4 @@
 import { Octokit } from '@octokit/rest';
-
 /**
  *
  * @param {import('@cloudflare/workers-types').EventContext<any,any,any>} context
@@ -7,7 +6,7 @@ import { Octokit } from '@octokit/rest';
  */
 export async function onRequestGet(context) {
 	try {
-		const { env } = context;
+		const { env, request } = context;
 
 		const configRaw = await env.HG_CONFIG;
 		const config = JSON.parse(configRaw);
@@ -16,6 +15,7 @@ export async function onRequestGet(context) {
 			auth: config.gitToken
 		});
 
+		// Get all files in the asset directory
 		/** @type {import('@octokit/types').OctokitResponse<any>} */
 		const assetFiles = await octokit.rest.repos.getContent({
 			owner: config.gitOwner,
@@ -34,6 +34,7 @@ export async function onRequestGet(context) {
 		}));
 
 		return new Response(JSON.stringify(assetObject), { status: 200 });
+		
 	} catch (error) {
 		return new Response(JSON.stringify(error), {
 			status: 500

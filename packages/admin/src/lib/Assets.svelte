@@ -5,9 +5,9 @@
     import { location } from './stores/location';
 
     export let handleAssetChange = (_) => {};
-    export let preselected = '';
+    export let preselected = {};
 
-    $: selected !== undefined && handleAssetChange(selected);
+    $: selected !== undefined && handleAssetChange(assets.find(asset => asset.name === selected));
 
     let selected;
     /** @type {FileList} */
